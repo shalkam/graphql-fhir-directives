@@ -1,0 +1,8 @@
+{
+  "name": "graphql-fhir-directives",
+  "version": "1.0.0",
+  "description": "A set of graphql directives for hl7 fhir ",
+  "main": "index.js",
+  "author": "Mostafa Sholkamy",
+  "license": "MIT"
+}

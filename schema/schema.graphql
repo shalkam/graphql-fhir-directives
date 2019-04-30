@@ -1,0 +1,8 @@
+directive @card(min: String max: String)  on INPUT_FIELD_DEFINITION
+directive @fixedString(value: String) on INPUT_FIELD_DEFINITION
+directive @fixedCode(value: String) on INPUT_FIELD_DEFINITION
+directive @binding(
+    strength: BindingStrengthEnum
+    description: String
+    codeSystem: String
+) on INPUT_FIELD_DEFINITION

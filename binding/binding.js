@@ -17,9 +17,7 @@ class BindingDirective extends SchemaDirectiveVisitor {
         name: `Bound${field.type.name}Enum`,
         values
       })
-      field.astNode.type.name.value = `Bound${
-        field.type.name
-      }Enum`
+      field.astNode.type.name.value = `Bound${field.type.name}Enum`
       this.schema._typeMap[`Bound${field.type.name}Enum`] = codesEnum
       field.type = codesEnum
     } catch (error) {
@@ -33,7 +31,7 @@ class BindingDirective extends SchemaDirectiveVisitor {
       } = await axios.get(this.args.codeSystem)
       const values = {}
       concept.forEach(({ code, definition }) => {
-        values[code] = { value: code, description: definition }
+        values[code.replace('-', '')] = { value: code, description: definition }
       })
       const codesEnum = new GraphQLEnumType({
         name: `Bound${field.type.ofType.name}Enum`,

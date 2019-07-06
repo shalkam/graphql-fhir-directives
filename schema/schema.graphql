@@ -6,3 +6,48 @@ directive @binding(
     description: String
     codeSystem: String
 ) on INPUT_FIELD_DEFINITION
+directive @slices(value: [SliceInput]) on INPUT_FIELD_DEFINITION
+
+input SliceInput {
+    id: String
+    path: String
+    sliceName: String
+    slicing: SlicingInput
+    fixedCodeableConcept: SliceCodeableConceptInput
+    min: Int
+    max: Int
+}
+
+input SliceCodeableConceptInput {
+    coding: [SliceCodingInput]
+    text: String
+}
+
+input SliceCodingInput {
+    system: String
+    version: String
+    code: String
+    display: String
+    userSelected: Boolean
+}
+input SlicingInput {
+    discriminator: [DiscriminatorInput]
+    rules: DiscriminatorRulesEnum
+    ordered: Boolean
+    description: String
+}
+
+input DiscriminatorInput {
+    type: DiscriminatorTypeEnum!
+    path: String!
+}
+
+enum DiscriminatorTypeEnum {
+    Value Exists Pattern Type Profile
+}
+
+enum DiscriminatorRulesEnum {
+    Closed
+    Open
+    OpenAtEnd
+}

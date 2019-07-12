@@ -4,7 +4,7 @@ const { GraphQLError } = require('graphql/error')
 class ListWithCard extends GraphQLScalarType {
   constructor (fieldType, args) {
     super({
-      name: `${getNamedType(fieldType)}_FHIRListWithCard`,
+      name: `${getNamedType(fieldType)}_card_FHIRList`,
       serialize (value) {
         return value
       },

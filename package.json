@@ -7,8 +7,12 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.18.0",
+    "dot-object": "^1.7.1",
+    "fhirpath": "^0.16.0",
     "graphql-import": "^0.7.1",
-    "graphql-tools": "^4.0.4"
+    "graphql-tools": "^4.0.4",
+    "lodash.isequal": "^4.5.0",
+    "yup": "^0.27.0"
   },
   "devDependencies": {
     "standard": "^12.0.1"

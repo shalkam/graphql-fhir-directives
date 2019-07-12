@@ -1,22 +1,7 @@
 const { GraphQLScalarType, valueFromAST, getNamedType } = require('graphql')
 const { GraphQLError } = require('graphql/error')
-const yup = require('yup')
 const fhirpath = require('fhirpath')
 const dot = require('dot-object')
-
-yup.addMethod(yup.array, 'slicing', function (message, rules) {
-  return this.test('slicing', message, function (list) {
-    const evaluation = fhirpath.evaluate(list, rules.join('.combine'))
-    const errIndex = evaluation.indexOf(false)
-    if (errIndex !== -1) {
-      return this.createError({
-        path: `[${errIndex}]`,
-        message: `${message} at rule ${rules[errIndex]}`
-      })
-    }
-    return true
-  })
-})
 
 class ListWithSlicing extends GraphQLScalarType {
   constructor (fieldType, args) {
@@ -35,8 +20,9 @@ class ListWithSlicing extends GraphQLScalarType {
 
       parseLiteral (ast) {
         const { value } = args
+        const values = valueFromAST(ast, fieldType)
         if (ast.kind !== 'ListValue') {
-          return new GraphQLError(
+          throw new GraphQLError(
             `@slices directive works only on list values`,
             [ast]
           )
@@ -44,46 +30,47 @@ class ListWithSlicing extends GraphQLScalarType {
         const { min: totalMin, max: totalMax } = value.find(
           ({ slicing }) => slicing
         )
+        if (totalMin && values.length < totalMin) {
+          throw new GraphQLError(`Minimum of ${totalMin} required`, [ast])
+        }
+        if (totalMax && values.length > totalMax) {
+          throw new GraphQLError(`Maximum of ${totalMax} exceeded`, [ast])
+        }
         const rules = value
           .filter(({ sliceName }) => sliceName)
           .reduce((a, { sliceName, min, max }) => {
-            const fields = value
+            value
               .filter(({ id }) => id && id.startsWith(`${sliceName}.`))
-              .map(value => {
-                if (value.fixedCodeableConcept) {
+              .forEach(value => {
+                if (value.fixedCodeableConcept && (min || max)) {
                   const dotRule = dot.dot(value.fixedCodeableConcept)
                   const key = Object.keys(dotRule)[0]
-                  const fhirpathRule = `(${value.path}.where(${key}='${
-                    dotRule[key]
-                  }').count() >= ${min} and ${value.path}.where(${key}='${
-                    dotRule[key]
-                  }').count() <= ${max})`
-                  return fhirpathRule
+                  if (min) {
+                    a.push(
+                      `(${value.path}.where(${key}='${
+                        dotRule[key]
+                      }').count() >= ${min})`
+                    )
+                  }
+                  if (max) {
+                    a.push(
+                      `(${value.path}.where(${key}='${
+                        dotRule[key]
+                      }').count() <= ${max})`
+                    )
+                  }
                 }
               })
-            return [...a, ...fields]
+            return a
           }, [])
-        const validationSchema = yup
-          .array()
-          .when('$totalMin', (totalMin, schema) =>
-            totalMin
-              ? schema.min(totalMin, `Minimum of ${totalMin} required`)
-              : schema
-          )
-          .when('$totalMax', (totalMax, schema) =>
-            totalMax
-              ? schema.max(totalMax, `Maximum of ${totalMax} exceeded`)
-              : schema
-          )
-          .slicing('Slicing mismatch', rules)
-        try {
-          validationSchema.validateSync(valueFromAST(ast, fieldType), {
-            context: { totalMax, totalMin }
-          })
-          return this.parseValue(ast)
-        } catch (error) {
-          throw new GraphQLError(error.message, [ast])
+        const evaluation = fhirpath.evaluate(values, rules.join('.combine'))
+        const errIndex = evaluation.indexOf(false)
+        if (errIndex !== -1) {
+          throw new GraphQLError(`Slicing err at rule ${rules[errIndex]}`, [
+            ast
+          ])
         }
+        return this.parseValue(ast)
       }
     })
     this.ofType = getNamedType(fieldType)

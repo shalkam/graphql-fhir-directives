@@ -5,7 +5,7 @@ class SlicesDirective extends SchemaDirectiveVisitor {
   visitInputFieldDefinition (field) {
     const fieldType = field.type
     const type = new ListWithSlicing(fieldType, this.args)
-    this.schema._typeMap[`${getNamedType(fieldType)}_FHIRListWithCard`] = type
+    this.schema._typeMap[`${getNamedType(fieldType)}_slicing_FHIRList`] = type
     field.type = type
   }
 }

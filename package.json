@@ -6,7 +6,7 @@
   "author": "Mostafa Sholkamy",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "dot-object": "^1.7.1",
     "fhirpath": "^0.16.0",
     "graphql-import": "^0.7.1",

@@ -7,7 +7,7 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.18.0",
-    "dot-object": "^1.7.1",
+    "dot-object": "^2.1.3",
     "fhirpath": "^0.16.0",
     "graphql-import": "^0.7.1",
     "graphql-tools": "^4.0.4",
